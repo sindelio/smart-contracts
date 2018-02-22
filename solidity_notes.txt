@@ -1,6 +1,8 @@
 GENERAL CONCEPTS
 
-Solidity is a high level programming language, contract oriented. In other words, Solidity is a object oriented programming language, whereas the objects of interest are contracts. So we can expect everything an object oriented language has, such as Python and Java, from Solidity. In fact, it supports:
+Solidity is a high level programming language, contract oriented. In other words, Solidity is a object oriented
+programming language, whereas the objects of interest are contracts. So we can expect everything an object oriented
+language has, such as Python and Java, from Solidity. In fact, it supports:
 
 - Inheritance and multiple inheritance
 - Constructors
@@ -46,6 +48,7 @@ Data types:
 
 ETHEREUM VIRTUAL MACHINE
 
+It's important to know well the EVM because that's where the contracts will be executed. 
 The EVM is composed of:
 
 - A stack of 32 byte addresses up to 1024 addresses total. Recursions aren't recommended as they can easily blow up the stack.
