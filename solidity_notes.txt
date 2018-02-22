@@ -1,0 +1,175 @@
+GENERAL CONCEPTS
+
+Solidity is a high level programming language, contract oriented. In other words, Solidity is a object oriented programming language, whereas the objects of interest are contracts. So we can expect everything an object oriented language has, such as Python and Java, from Solidity. In fact, it supports:
+
+- Inheritance and multiple inheritance
+- Constructors
+- Polymorphism
+- Interfaces
+- Public, private, internal and external functions and variables
+- Maps
+
+It is also a statically typed language, meaning that constraints are enforced in compilation time, instead of runtime. 
+
+SYNTAX KEYWORDS AND NOTES
+
+- is
+	Used for inheritance and multiple inheritance.
+- contract
+	Used to declare a contract(class) that can be instantiated(deployed) in the EVM.
+- function
+	Used to declare a function. Functions can 
+- modifier
+- public
+- private
+- internal
+- external
+- view
+- constant
+	Alias for view, but deprecated.
+- pure
+- return
+- payable
+- this
+
+Data types:
+
+- int
+- uint
+- unit256
+- uint8
+- address
+- bool
+- string
+- bytes
+- 
+
+ETHEREUM VIRTUAL MACHINE
+
+The EVM is composed of:
+
+- A stack of 32 byte addresses up to 1024 addresses total. Recursions aren't recommended as they can easily blow up the stack.
+- A memory. An infinetely expanding byte array but gets pricier in Gas as it builds up. It holds the present state of the Ethereum Blockchain.
+- A storage. A permanent contract storage, read and write.
+- Environment Variables.
+- Logs.
+- Sub-Calling. Operation by which a contract can call another contract.
+
+Gas: a mechanism to avoid the halting problem. It consists in payment for computational steps in the EVM.
+
+RLP: Recursive Length Prefix Encoding. Basically puts the lenght before and a code after, in this syntax: lenght x code. used extensively in the EVM.
+
+ETHEREUM BLOCKCHAIN
+
+Every block header contains 3 tries:
+ 	
+- Transactions
+- State
+- Receipts
+
+State. Consists of key-values mapping addresses to acount objects. Every account contains 4 pieces of data:
+	
+- Nonce. Proof of work that allows one to insert append transactions to the Blockchain.
+- Balance. In Ether (ETH). 
+- Code hash. SHA most likely.
+- Storage trie root.
+
+Transactions. Contains 7 values:
+	
+- Nonce (anti replay attack)
+- Gasprice (amount of ether per unit gas)
+- Startgas (maximum gas consumable)
+- To (destination address)
+- Value (amount of ETH to send)
+- Data (readable by contract code)
+- v, r, s (ECDSA cryptography signature values)
+
+Receipts. Every transaction has a corresponding receipt. Has a few pieces of data:
+
+- Intermediate state root (hash that represents the state after the transaction is executed)
+- Cumulative gas used (total amount of gas used in that block including that transaction)
+- Logs (append-only, not readable by contracts)
+
+Mining: Process by which blocks of transactions are appended in Ethereum Blockchain. It consists in the resolution of a math problem by the nodes, and whichever node solves the problem first gets the right to append a block, a.k.a. set of transactions,  to the Blockchain. Mining in Ethereum is GPU friendly, with a memory hardness approach. This means that memory is the most important factor, not computational power.
+
+Merkle tree: Tree data structure that allows for efficient verifiable proof that a transaction was included in a block.
+
+Trie: 
+
+SECURITY MEASURES AND GOOD PRACTICES
+
+Security recommendations list:
+	
+1. Fail as early and loudly as possible. Meaning: use exceptions! a.k.a. require() and assert().
+2. Favor pull over push payments.
+3. Order your function code: conditions => actions => interactions. A.k.a checks => effects => interactions pattern.
+4. Be aware of platform limits. EVM has a lot of constraints, such as Gas and transaction speed.
+5. Write tests, do audits. Can't fail in the mainnet!
+6. Use fault tolerance and automatic bug bounties.
+7. Limit the amount of funds deposited.
+8. Write simple and modular code.
+9. Don’t write all your code from scratch.
+
+Common pitfalls:
+
+1. Private information leaked.
+2. Re-entrancy attacks.
+3. Loops can trigger Gas limit.
+4. Ether send function can fail.
+5. Timestamp can be manipulated by miners.
+6. Data overflow and underflow. Example: loop with iterator i of type int, instead of type uint256. i will easily reach it's limit and the loop will malfunction.
+
+COMPILERS
+
+- Remix
+- Solc
+
+TEST SUITES
+
+- Truffle
+- Testrpc
+- Geth
+- Metamask
+
+GOOD MATERIAL
+
+- Documentation. 
+		https://solidity.readthedocs.io/en/develop/
+- (Tutorial) Create your own cryptocurrency with Ethereum.
+		https://www.ethereum.org/token
+- (Course) Basics of Solidity - Bitdegree.
+		https://solidity.bitdegree.org/
+- (Tutorial) The Hitchhiker’s Guide to Smart Contracts in Ethereum.
+		https://blog.zeppelin.solutions/the-hitchhikers-guide-to-smart-contracts-in-ethereum-848f08001f05
+- (Tutorial) Onward with Ethereum Smart Contract Security.
+		https://blog.zeppelin.solutions/onward-with-ethereum-smart-contract-security-97a827e47702
+- (Book) Mastering Ethereum.
+- (Book) Introducing Ethereum and Solidity: Foundations of Cryptocurrency and Blockchain programming for Beginners.
+
+
+- I can return multiple variables. I can also specify the returned variable inside the function, ommiting the return statement from the function "header"/"specification". I can return a variable created in the function as well, may it be in the "header" or in the "body".
+- I can call functions with the order of the parameters changed passing an object to it.
+- View functions: can read from storage. pure functions: can't read or write to storage. Any normal function can write to storage.
+- Function modifiers can be used to modify functions. They are useful to reuse code in different functions. Syntax: "function name() modifier{}". Inside the modifier, the body function is replaced by "_;""
+- there are 4 types of visibility for functions and state variables: external, internal, public and private. For state variables, external is not possible and the default is internal. For functions, default is public. An external function cannot be called internally, meaning f() does not work, but this.f() works because it makes a call/message in solidity. External functions are interesting to recevive large amounts of data, because they use less gas than public functions for the same purpose. 
+Main ideas: External -> other contracts can access . Internal -> The contract itself and its childs can access. Private -> Only the contract itself can. Public -> Anyone can.
+
+- Inheritance is achieved through the "is" syntax. Contracts can inherit functions, state variables and everything else from their supercontracts. Multiple inheritance is supported as well.
+- Polymorphism means that we can override methods from the super contracts. That chages the original behavior of the super contract. It works by creating a method/function with the same name, but different functionalities. 
+- Assert and require are special functions that help in dealing with exceptions. Throw is deprecated in the newer versions of solidity. Require should be used instead of throw. Require checks on externally provided input data. Assert guarantees that a certain internal state never occurs.
+- Payable is a function modifier that allows functions to receive ether.
+
+- It is important to disnguish 2 types od functions:
+	Read-only (constant or view) functions, makes no change to state, costs no gas
+	Transactional functions, makes changes to state, costs gas
+
+	
+QUESTIONS
+
+? Payable
+? This statement
+? Indexed attributes on events??? Up to 3 parameters can have the indexed attribute in an event.
+
+
+
+
