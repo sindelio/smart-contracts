@@ -1,38 +1,55 @@
 GENERAL CONCEPTS
 
-Solidity is a high level programming language, contract oriented. In other words, Solidity is a object oriented
-programming language, whereas the objects of interest are contracts. So we can expect everything an object oriented
-language has, such as Python and Java, from Solidity. In fact, it supports:
+Solidity is a high level programming language, contract oriented. In other words, Solidity is an object oriented programming language, whereas the objects of interest are contracts. So we can expect everything an object oriented language has, such as Python and Java, from Solidity. In fact, it supports:
 
 - Inheritance and multiple inheritance
 - Constructors
 - Polymorphism
 - Interfaces
-- Public, private, internal and external functions and variables
+- Public, private, internal and external functions and variables (except external variables)
 - Maps
 
 It is also a statically typed language, meaning that constraints are enforced in compilation time, instead of runtime. 
 
 SYNTAX KEYWORDS AND NOTES
-
 - is
-	Used for inheritance and multiple inheritance.
+	Used for inheritance and multiple inheritance. Contracts can inherit functions, state variables and everything else from their supercontracts.
 - contract
 	Used to declare a contract(class) that can be instantiated(deployed) in the EVM.
 - function
-	Used to declare a function. Functions can 
+	Used to declare a function. A function can be called with the order of the parameters changed by passing an object to it. It is important to disnguish 2 types of functions: Read-only (constant or view) functions, makes no change to state, costs no Gas. Transactional functions, makes changes to state, costs Gas. A function is public by default.
+- var
+	Used to declare a state variable. Defaults to internal, can't be external.
 - modifier
+	Used to declare a modifier, which is a special function that modifies other functions. Modifiers are useful to reuse code in different functions. Syntax: "function name() modifier{}". Inside the modifier, the body function is replaced by "_;".
 - public
+	Specifies that a state variable or function is viewable by the contract itself, its childs, external contracts and external calls.
 - private
+	Specifies that a state variable or function is viewable only by it's contract. The subcontracts, or childs, can't call a private function from their parents.
 - internal
+	Specifies that a state variable or function is viewable by it's smart contracts and it's childs.
 - external
+	Specifies that a function can only be called by outside smart contracts. External functions are interesting to recevive large amounts of data, because they use less Gas than public functions for the same purpose.
 - view
+	Specifies that a function can only read from storage. A view functions costs no Gas. A normal function can read and write to storage, but it costs Gas.
 - constant
 	Alias for view, but deprecated.
 - pure
+	Specifies that a function can't read or write to storage. A pure function costs no Gas. A normal function can read and write to storage, but it costs Gas.
+- returns
+	Specifies the expected returned variables from a function. A function can return multiple variables.
 - return
+	Classic return statement. One can also specify the returned variable inside the function, ommiting the return statement from the function "header"/"specification".
 - payable
+	A function modifier that allows functions to receive Ether.
 - this
+	GOTTA STUDY 
+- event
+	Used to declare an event. Events are logged into the Blockchain in the receipts part. Events are important for auditions and code clarity.
+- assert
+	Assert and require are special functions that help in dealing with exceptions. Assert guarantees that a certain internal state never occurs.
+- require
+	Assert and require are special functions that help in dealing with exceptions. Throw is deprecated in the newer versions of Solidity. Require should be used instead of throw. Require checks on externally provided input data. 
 
 Data types:
 
@@ -70,7 +87,7 @@ Every block header contains 3 tries:
 - State
 - Receipts
 
-State. Consists of key-values mapping addresses to acount objects. Every account contains 4 pieces of data:
+State. Consists of key-values mapping addresses to account objects. Every account contains 4 pieces of data:
 	
 - Nonce. Proof of work that allows one to insert append transactions to the Blockchain.
 - Balance. In Ether (ETH). 
@@ -95,9 +112,11 @@ Receipts. Every transaction has a corresponding receipt. Has a few pieces of dat
 
 Mining: Process by which blocks of transactions are appended in Ethereum Blockchain. It consists in the resolution of a math problem by the nodes, and whichever node solves the problem first gets the right to append a block, a.k.a. set of transactions,  to the Blockchain. Mining in Ethereum is GPU friendly, with a memory hardness approach. This means that memory is the most important factor, not computational power.
 
-Merkle tree: Tree data structure that allows for efficient verifiable proof that a transaction was included in a block.
+Merkle tree: Tree data structure that allows for efficient verifiable proof that a transaction was included in a block. Also called hash trees, because it sores the hashes of the data in the nodes of the tree.
 
-Trie: 
+Trie: Tree data structure that allows for efficient lookups or searches. Also called digital tree or prefix tree or radix tree.
+
+Merkle-patricia-tree: A special type of trie used in the Ethereum Blockchain. Also called patricia tree, this type of trie has some improvements over the normal trie. In the Ethereum Blockchain, all entries in the patricia tree are encoded using the RLP (Recursive Length Prefix).
 
 SECURITY MEASURES AND GOOD PRACTICES
 
@@ -148,31 +167,9 @@ GOOD MATERIAL
 		https://blog.zeppelin.solutions/onward-with-ethereum-smart-contract-security-97a827e47702
 - (Book) Mastering Ethereum.
 - (Book) Introducing Ethereum and Solidity: Foundations of Cryptocurrency and Blockchain programming for Beginners.
-
-
-- I can return multiple variables. I can also specify the returned variable inside the function, ommiting the return statement from the function "header"/"specification". I can return a variable created in the function as well, may it be in the "header" or in the "body".
-- I can call functions with the order of the parameters changed passing an object to it.
-- View functions: can read from storage. pure functions: can't read or write to storage. Any normal function can write to storage.
-- Function modifiers can be used to modify functions. They are useful to reuse code in different functions. Syntax: "function name() modifier{}". Inside the modifier, the body function is replaced by "_;""
-- there are 4 types of visibility for functions and state variables: external, internal, public and private. For state variables, external is not possible and the default is internal. For functions, default is public. An external function cannot be called internally, meaning f() does not work, but this.f() works because it makes a call/message in solidity. External functions are interesting to recevive large amounts of data, because they use less gas than public functions for the same purpose. 
-Main ideas: External -> other contracts can access . Internal -> The contract itself and its childs can access. Private -> Only the contract itself can. Public -> Anyone can.
-
-- Inheritance is achieved through the "is" syntax. Contracts can inherit functions, state variables and everything else from their supercontracts. Multiple inheritance is supported as well.
-- Polymorphism means that we can override methods from the super contracts. That chages the original behavior of the super contract. It works by creating a method/function with the same name, but different functionalities. 
-- Assert and require are special functions that help in dealing with exceptions. Throw is deprecated in the newer versions of solidity. Require should be used instead of throw. Require checks on externally provided input data. Assert guarantees that a certain internal state never occurs.
-- Payable is a function modifier that allows functions to receive ether.
-
-- It is important to disnguish 2 types od functions:
-	Read-only (constant or view) functions, makes no change to state, costs no gas
-	Transactional functions, makes changes to state, costs gas
-
 	
 QUESTIONS
 
-? Payable
 ? This statement
 ? Indexed attributes on events??? Up to 3 parameters can have the indexed attribute in an event.
-
-
-
-
+? Understand better the trie, radix tree and merkle tree.
