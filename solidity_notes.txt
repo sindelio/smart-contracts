@@ -12,6 +12,7 @@ Solidity is a high level programming language, contract oriented. In other words
 It is also a statically typed language, meaning that constraints are enforced in compilation time, instead of runtime. 
 
 SYNTAX KEYWORDS AND NOTES
+
 - is
 	Used for inheritance and multiple inheritance. Contracts can inherit functions, state variables and everything else from their supercontracts.
 - contract
@@ -144,15 +145,22 @@ Common pitfalls:
 COMPILERS
 
 - Remix
+	Online compiler, has no deployer.
 - Solc
+	Local, offline compiler. Has no deployer either.
 
 TEST SUITES
 
 - Truffle
+	Local compiler, linker, deployer and binary manager. Very customizable. 
 - Testrpc
+	Local Blockchain abstraction built in Javascript backend (Node.js) for test purposes.
 - Geth
+	Command Line Interface - CLI, for interacting with Blockchain networks and abstractions.
 - Metamask
+	Browser extension that allows interaction with websites that have Ethereum related services, such as payments. Has a local Ethereum wallet and a contract watcher built in.
 - Withpragma
+	Online Integrated Development Interface - IDE, with a contract compiler, deployer and watcher.
 
 GOOD MATERIAL
 
@@ -168,9 +176,25 @@ GOOD MATERIAL
 		https://blog.zeppelin.solutions/onward-with-ethereum-smart-contract-security-97a827e47702
 - (Book) Mastering Ethereum.
 - (Book) Introducing Ethereum and Solidity: Foundations of Cryptocurrency and Blockchain programming for Beginners.
-	
+
+ETHEREUM WALLETS
+
+- Ethereum Wallet
+	Official wallet. A desktop wallet that supports contract deployment and watching. Can be used with the mainnet or the test nets, and also have a light client.
+	Found at: https://github.com/ethereum/mist/releases
+- MyEtherWallet
+	Online wallet. Supports contract deplyoment and contract watching. Can be used with the mainnet or the test nets.
+	Found at: https://www.myetherwallet.com/
+
 QUESTIONS
 
 ? This statement
 ? Indexed attributes on events??? Up to 3 parameters can have the indexed attribute in an event.
 ? Understand better the trie, radix tree and merkle tree.
+
+TODO LIST
+
+1. Test a crowdfunding smart contract
+2. Get the book "Introducing Ethereum and Solidity: Foundations of Cryptocurrency and Blockchain programming for Beginners" asap
+2. Study BAT smart contract
+3. Study Zepellin secure smart contracts
