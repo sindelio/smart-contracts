@@ -18,7 +18,8 @@ SYNTAX KEYWORDS AND NOTES
 - contract
 	Used to declare a contract(class) that can be instantiated(deployed) in the EVM.
 - function
-	Used to declare a function. A function can be called with the order of the parameters changed by passing an object to it. It is important to disnguish 2 types of functions: Read-only (constant or view) functions, makes no change to state, costs no Gas. Transactional functions, makes changes to state, costs Gas. A function is public by default.
+	Used to declare a function. A function can be called with the order of the parameters changed by passing an object to it. It is important to distinguish 2 types of functions: Read-only (constant or view) functions, makes no change to state, costs no Gas. Transactional functions, makes changes to state, costs Gas. A function is public by default.
+	Functions with no names are used as a response to payments sent to the contract. There can only be one nameless function per contract and it should be one the payable type.
 - var
 	Used to declare a state variable. Defaults to internal, can't be external.
 - modifier
@@ -62,7 +63,22 @@ Data types:
 - bool
 - string
 - bytes
+
+
+BUILT IN FUNCTIONS AND VARIABLES:
+
+- msg.sender.send()
+	Used to transfer Ethereum from one account to another.
+
+UNITS AND GLOBALLY AVAILABLE VARIABLES:
+
+- now
+	Used to get the time and date of the present moment.
+- ether
+	Ether cryptocurrency.
 - 
+
+
 
 ETHEREUM VIRTUAL MACHINE
 
@@ -156,7 +172,7 @@ TEST SUITES
 - Testrpc
 	Local Blockchain abstraction built in Javascript backend (Node.js) for test purposes.
 - Geth
-	Command Line Interface - CLI, for interacting with Blockchain networks and abstractions.
+	Command Line Interface - CLI, for interacting with Blockchain networks and abstractions. Written in Go. Also has versions in C++ (named ETH) and Python (named Pyetapp)
 - Metamask
 	Browser extension that allows interaction with websites that have Ethereum related services, such as payments. Has a local Ethereum wallet and a contract watcher built in.
 - Withpragma
@@ -176,7 +192,9 @@ GOOD MATERIAL
 		https://blog.zeppelin.solutions/onward-with-ethereum-smart-contract-security-97a827e47702
 - (Book) Mastering Ethereum.
 - (Book) Introducing Ethereum and Solidity: Foundations of Cryptocurrency and Blockchain programming for Beginners.
-
+- (Book) Building Blockchain Projects: Building Decentralized Application with Ethereum and Solidity.
+- (Book) Ethereum: Blockchains, Digital Assets, Smart Contracts, Decentralized Digital Organizations.
+ 
 ETHEREUM WALLETS
 
 - Ethereum Wallet
@@ -194,7 +212,16 @@ QUESTIONS
 
 TODO LIST
 
+0. Read the entire Solidity documentation (20%)
 1. Test a crowdfunding smart contract
-2. Get the book "Introducing Ethereum and Solidity: Foundations of Cryptocurrency and Blockchain programming for Beginners" asap
-2. Study BAT smart contract
-3. Study Zepellin secure smart contracts
+2. Check the book "Introducing Ethereum and Solidity: Foundations of Cryptocurrency and Blockchain programming for Beginners"
+3. Study other TOKEN standards aside from ERC20
+4. Study BAT smart contract
+5. Study Zepellin secure smart contracts
+6. Create my own Dapp
+
+MILESTONES
+
+1. Created my own Ethereum token. the Sinds Coin!
+2. Succesfully tested a smart contract using Truffle and Testrpc!
+3. Successfully deployed a smart contract using Metamask and Withpragma!
