@@ -1,3 +1,8 @@
+# ABOUT WEB3.JS
+
+Web3.js is the official Javascript library for the Ethereum platform. 
+It allows one to write client-side web applications that can interact with Ethereum and Ethereum based blockchains.
+
 # HOW TO USE THIS WEB3 TEST
 
 ### Step 0:
