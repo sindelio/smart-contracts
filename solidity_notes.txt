@@ -9,7 +9,17 @@ Solidity is a high level programming language, contract oriented. In other words
 - Public, private, internal and external functions and variables (except external variables)
 - Maps
 
-It is also a statically typed language, meaning that constraints are enforced in compilation time, instead of runtime. 
+And also:
+
+- User defined types
+- Libraries
+
+Solidity is a statically typed language, meaning that constraints are enforced in compilation time, instead of runtime. 
+
+SMART CONTRACTS
+
+A contract in the sense of Solidity is a collection of code (its functions) and data (its state) that resides at a specific address on the Ethereum blockchain.
+
 
 SYNTAX KEYWORDS AND NOTES
 
@@ -25,7 +35,16 @@ SYNTAX KEYWORDS AND NOTES
 - modifier
 	Used to declare a modifier, which is a special function that modifies other functions. Modifiers are useful to reuse code in different functions. Syntax: "function name() modifier{}". Inside the modifier, the body function is replaced by "_;".
 - public
-	Specifies that a state variable or function is viewable by the contract itself, its childs, external contracts and external calls.
+	Specifies that a state variable or function is viewable by the contract itself, its childs, external contracts and external calls. 
+	When the public keyword is used as follows:
+
+	address public minter;
+
+	The compiler will create code for a getter function similar to:
+
+	function minter() returns (address) { return minter; }
+
+	Adding a function with the same name would not work as above, because we would have a variable and a function with the same name, both created by the code, and the compiler would not know what to do with them.
 - private
 	Specifies that a state variable or function is viewable only by it's contract. The subcontracts, or childs, can't call a private function from their parents.
 - internal
@@ -47,30 +66,52 @@ SYNTAX KEYWORDS AND NOTES
 - this
 	GOTTA STUDY 
 - event
-	Used to declare an event. Events are logged into the Blockchain in the receipts part. Events are important for auditions and code clarity.
+	Used to declare an event. Events are logged into the Blockchain in the receipts part. Events are important for auditions and code clarity. Events are useful to light clients to sync with the Blockchain.
 - assert
 	Assert and require are special functions that help in dealing with exceptions. Assert guarantees that a certain internal state never occurs.
 - require
 	Assert and require are special functions that help in dealing with exceptions. Throw is deprecated in the newer versions of Solidity. Require should be used instead of throw. Require checks on externally provided input data. 
+- pragma
+	Pragmas are instructions for the compiler about how to treat the source code.
+- emit
+	Used to emit an event.
+- mapping
+	Creates complex data types through mapping one type to another. That is, it creates functions from one domain to another. Although, the maps don't have a way to look up all the values or all the keys that are being used. If these operations are required, one should use a more complex data type.
+	For a code like this:
 
-Data types:
+	mapping (address => uint) public balances;
+
+	The compiler creates a getter function similar to:
+
+	function balances(address _account) public view returns (uint) {
+    	return balances[_account];
+	}
+
+
+DATA TYPES
 
 - int
 - uint
 - unit256
 - uint8
 - address
+	160-bit value that does not allow any arithmetic operations. Allows relational operations tho.
 - bool
 - string
 - bytes
 
 
-BUILT IN FUNCTIONS AND VARIABLES:
+GLOBALLY AVAILABLE VARIABLES:
+
+- msg
+	A magic global variable that contains some properties which allow access to the blockchain. msg.sender is always the address where the current (external) function call came from. 
+
+BUILT IN FUNCTIONS:
 
 - msg.sender.send()
 	Used to transfer Ethereum from one account to another.
 
-UNITS AND GLOBALLY AVAILABLE VARIABLES:
+UNITS:
 
 - now
 	Used to get the time and date of the present moment.
@@ -80,9 +121,18 @@ UNITS AND GLOBALLY AVAILABLE VARIABLES:
 
 
 
-ETHEREUM VIRTUAL MACHINE
+ETHEREUM VIRTUAL MACHINE (EVM)
 
-It's important to know well the EVM because that's where the contracts will be executed. 
+The Ethereum Virtual Machine or EVM is the runtime environment for smart contracts in Ethereum. It is not only sandboxed but actually completely isolated, which means that code running inside the EVM has no access to network, filesystem or other processes. Smart contracts even have limited access to other smart contracts.
+
+Accounts:
+
+There are two kinds of accounts in Ethereum which share the same address space: External accounts that are controlled by public-private key pairs (i.e. humans) and contract accounts which are controlled by the code stored together with the account.
+Regardless of whether or not the account stores code, the two types are treated equally by the EVM.
+Every account has a persistent key-value store mapping 256-bit words to 256-bit words called storage.
+Furthermore, every account has a balance in Ether (in “Wei” to be exact) which can be modified by sending transactions that include Ether.
+
+/*
 The EVM is composed of:
 
 - A stack of 32 byte addresses up to 1024 addresses total. Recursions aren't recommended as they can easily blow up the stack.
@@ -95,8 +145,22 @@ The EVM is composed of:
 Gas: a mechanism to avoid the halting problem. It consists in payment for computational steps in the EVM.
 
 RLP: Recursive Length Prefix Encoding. Basically puts the lenght before and a code after, in this syntax: lenght x code. used extensively in the EVM.
+*/
 
 ETHEREUM BLOCKCHAIN
+
+A blockchain is a globally shared, transactional database. This means that everyone can read entries in the database just by participating in the network. If you want to change something in the database, you have to create a so-called transaction which has to be accepted by all others. 
+
+Transactions:
+
+The word transaction implies that the change you want to make (assume you want to change two values at the same time) is either not done at all or completely applied. Furthermore, while your transaction is applied to the database, no other transaction can alter it.
+As an example, imagine a table that lists the balances of all accounts in an electronic currency. If a transfer from one account to another is requested, the transactional nature of the database ensures that if the amount is subtracted from one account, it is always added to the other account. If due to whatever reason, adding the amount to the target account is not possible, the source account is also not modified.
+Furthermore, a transaction is always cryptographically signed by the sender (creator). This makes it straightforward to guard access to specific modifications of the database. In the example of the electronic currency, a simple check ensures that only the person holding the keys to the account can transfer money from it.
+
+Blocks:
+
+Groups of transactions.
+The blocks form a linear sequence in time and that is where the word “blockchain” derives from. Blocks are added to the chain in rather regular intervals - for Ethereum this is roughly every 17 seconds.
 
 Every block header contains 3 tries:
  	
@@ -158,12 +222,21 @@ Common pitfalls:
 5. Timestamp can be manipulated by miners.
 6. Data overflow and underflow. Example: loop with iterator i of type int, instead of type uint256. i will easily reach it's limit and the loop will malfunction.
 
+SOLIDITY INTEGRATIONS
+
+- Sublime language syntax package for Solidity
+	Solidity syntax highlighting for SublimeText editor.
+- Vim Solidity & Vim Synthastic
+	Plugins for the Vim editor providing synthax highlighting and compile checking.
+
 COMPILERS
 
 - Remix
-	Online compiler, has no deployer.
+	Online IDE with a compiler, has no deployer.
 - Solc
 	Local, offline compiler. Has no deployer either.
+- Visual Studio Extension
+	Solidity plugin for Microsoft Visual Studio that includes a Solidity compiler.
 
 TEST SUITES
 
@@ -177,6 +250,15 @@ TEST SUITES
 	Browser extension that allows interaction with websites that have Ethereum related services, such as payments. Has a local Ethereum wallet and a contract watcher built in.
 - Withpragma
 	Online Integrated Development Interface - IDE, with a contract compiler, deployer and watcher.
+- Etheratom
+	Plugin for the Atom editor that features syntax highlighting, compilation and a runtime environment (Backend node & VM compatible).
+
+OTHER SOLIDITY TOOLS
+
+- Doxity
+	Documentation Generator for Solidity.
+- Dapp
+	Build tool, package manager, and deployment assistant for Solidity.
 
 GOOD MATERIAL
 
@@ -212,13 +294,16 @@ QUESTIONS
 
 TODO LIST
 
+-1. Write about the double spending attack
 0. Read the entire Solidity documentation (20%)
 1. Test a crowdfunding smart contract
 2. Check the book "Introducing Ethereum and Solidity: Foundations of Cryptocurrency and Blockchain programming for Beginners"
 3. Study other TOKEN standards aside from ERC20
 4. Study BAT smart contract
 5. Study Zepellin secure smart contracts
-6. Create my own Dapp
+6. Study the Dapp Solidity Tool
+7. Create my own Dapp
+
 
 MILESTONES
 
