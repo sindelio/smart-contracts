@@ -1,4 +1,4 @@
-# HOW TO USE WEB3
+# HOW TO USE THIS WEB3 TEST
 
 ### Step 0:
 
