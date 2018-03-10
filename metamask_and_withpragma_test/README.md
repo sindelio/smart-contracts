@@ -13,4 +13,4 @@ Withpragma is an online IDE to write smart contracts in Solidity for the Ethereu
 
 ### Step 2: Compile the smart contract code in the latest version of the Solidity compiler (0.4.21 in the moment this was written).
 
-### Step 3: Deploy the smart contract on the Rinkeby testnet or the Ethereum livenet. A popup from Metamask will appear asking for permission to execute the transaction. The transaction will have a Gas cost in Gas, and it will be possible to accept the transaction if there are enough funds. That's pretty much it.
+### Step 3: Deploy the smart contract on the Rinkeby testnet or the Ethereum livenet. A popup from Metamask will appear asking for permission to execute the transaction. The transaction will have a cost in Gas, and it will be possible to accept the transaction if there are enough funds. That's pretty much it.
