@@ -8,7 +8,7 @@ In later stages it is necessary to test the smart contracts in a complete Ethere
 
 # HOW TO USE THIS TRUFFLE AND TESTRPC TEST
 
-### Step 0: Download an example box from rTruffle website. For example:
+### Step 0: Download an example box from Truffle website. For example:
 
 ```
 $ truffle unbox metacoin
@@ -58,11 +58,28 @@ $ truffle test
 ```
 $ truffle console
 ```
-### Step 7: This is where it gets fun. 
+### Step 7: This is where it gets fun. The idea is to create an abstraction of the smart contract, so that we can interact and test it:
 
 ```
-truffle(development)> 
+truffle(development)> var instance = Contract.at(Contract.address);
 ```
+
+Note: Substitute Contract for the smart contract name. In this example, it would be MetaCoin since we downloaded that in the Truffle box.
+
+Or, if one wants to interact with the deployed smart contract without creating an instance:
+
+```
+truffle(development)> Contract.deployed().then(function(instance){console.log(instance);});
+```
+
+Or even:
+
+```
+truffle(development)> console.log(Contract.deployed())
+```
+
+That way, specially with the first method, one can interact with a smart contract, get its variables, call its functions, events and whatnot.
+
 
 
 
