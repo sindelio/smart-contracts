@@ -7,7 +7,7 @@ Withpragma is an online IDE to write smart contracts in Solidity for the Ethereu
 
 ### Step -1: Install the Metamask browser extension/plugin, create an account and login.
 
-### Step -0: Browse to **https://www.withpragma.com/**, create an account and login.
+### Step 0: Browse to **https://www.withpragma.com/**, create an account and login.
 
 ### Step 1: Go to the editor in **https://www.withpragma.com/editor**.
 
