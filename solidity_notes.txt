@@ -18,8 +18,7 @@ Solidity is a statically typed language, meaning that constraints are enforced i
 
 SMART CONTRACTS
 
-A contract in the sense of Solidity is a collection of code (its functions) and data (its state) that resides at a specific address on the Ethereum blockchain.
-
+A contract in the sense of Solidity is a collection of code (its functions) and data (its state) that resides at a specific address on the Ethereum blockchain. Currently a contract cannot activate itself automatically.
 
 SYNTAX KEYWORDS AND NOTES
 
@@ -27,9 +26,22 @@ SYNTAX KEYWORDS AND NOTES
 	Used for inheritance and multiple inheritance. Contracts can inherit functions, state variables and everything else from their supercontracts.
 - contract
 	Used to declare a contract(class) that can be instantiated(deployed) in the EVM.
+- library
+	xx
 - function
 	Used to declare a function. A function can be called with the order of the parameters changed by passing an object to it. It is important to distinguish 2 types of functions: Read-only (constant or view) functions, makes no change to state, costs no Gas. Transactional functions, makes changes to state, costs Gas. A function is public by default.
 	Functions with no names are used as a response to payments sent to the contract. There can only be one nameless function per contract and it should be one the payable type.
+
+	function (<parameter types>) {internal|external|public|private} [pure|constant|view|payable] [returns (<return types>)]
+
+- for
+
+- continue
+
+- break
+
+- enum
+
 - var
 	Used to declare a state variable. Defaults to internal, can't be external.
 - modifier
@@ -76,7 +88,7 @@ SYNTAX KEYWORDS AND NOTES
 - emit
 	Used to emit an event.
 - mapping
-	Creates complex data types through mapping one type to another. That is, it creates functions from one domain to another. Although, the maps don't have a way to look up all the values or all the keys that are being used. If these operations are required, one should use a more complex data type.
+	Creates complex data types through mapping one type to another. That is, it creates functions from one domain to another. Although, the maps don't have a way to look up all the values or all the keys that are being used. If these operations are required, one should use a more complex data type. Maps automatically create usable arrays from one data type to another.
 	For a code like this:
 
 	mapping (address => uint) public balances;
@@ -86,7 +98,11 @@ SYNTAX KEYWORDS AND NOTES
 	function balances(address _account) public view returns (uint) {
     	return balances[_account];
 	}
+- storage
+	????
+- memory
 
+- delete
 
 DATA TYPES
 
@@ -100,6 +116,16 @@ DATA TYPES
 - string
 - bytes
 
+LITERALS
+
+- Hexadeciaml. e.g. hex"001122FF"
+- 
+
+ESCAPE SEQUENCES FOR STRING LITERALS
+
+- \n
+- \xNN
+- \uNNNN
 
 GLOBALLY AVAILABLE VARIABLES:
 
@@ -110,6 +136,8 @@ BUILT IN FUNCTIONS:
 
 - msg.sender.send()
 	Used to transfer Ethereum from one account to another.
+- now
+	????
 
 UNITS:
 
@@ -199,12 +227,23 @@ Trie: Tree data structure that allows for efficient lookups or searches. Also ca
 
 Merkle-patricia-tree: A special type of trie used in the Ethereum Blockchain. Also called patricia tree, this type of trie has some improvements over the normal trie. In the Ethereum Blockchain, all entries in the patricia tree are encoded using the RLP (Recursive Length Prefix).
 
+EVM GOOD PRACTICES AND TRICKS
+
+- Use bytes instead of byte[]. It is cheaper because each element in byte[] has 32 bytes, whereas bytes is dynamically allocated.
+- callcode is deprecated. Use delegatecall or even better: let the caller withdraw his funds.
+- this.balance can be used to query the current contract balance.
+- There's no octal literals in Solidity. Only decimal and hexadecimal literals. e.g. 0.1, .1, 1.. Scientific notation is supported with a fractional base and an integer exponent. e.g. 2.5e1
+- Explicity conversion (casting) is possible for some types.
+-
+
+
+
 SECURITY MEASURES AND GOOD PRACTICES
 
 Security recommendations list:
 	
 1. Fail as early and loudly as possible. Meaning: use exceptions! a.k.a. require() and assert().
-2. Favor pull over push payments.
+2. Favor pull over push payments. Let the caller withdraw his funds.
 3. Order your function code: conditions => actions => interactions. A.k.a checks => effects => interactions pattern.
 4. Be aware of platform limits. EVM has a lot of constraints, such as Gas and transaction speed.
 5. Write tests, do audits. Can't fail in the mainnet!
@@ -231,15 +270,15 @@ SOLIDITY INTEGRATIONS
 
 COMPILERS
 
-- Remix
-	Online IDE with a compiler, has no deployer.
 - Solc
-	Local, offline compiler. Has no deployer either.
+	Local, offline compiler. Has no deployer.
 - Visual Studio Extension
 	Solidity plugin for Microsoft Visual Studio that includes a Solidity compiler.
 
 TEST SUITES
 
+- Remix
+	Online IDE with a compiler and a deployer. Very customizable.
 - Truffle
 	Local compiler, linker, deployer and binary manager. Very customizable. 
 - Testrpc
@@ -262,7 +301,7 @@ OTHER SOLIDITY TOOLS
 
 GOOD MATERIAL
 
-- Documentation. 
+- (Official Documentation) 
 		https://solidity.readthedocs.io/en/develop/
 - (Tutorial) Create your own cryptocurrency with Ethereum.
 		https://www.ethereum.org/token
@@ -294,15 +333,18 @@ QUESTIONS
 
 TODO LIST
 
--1. Write about the double spending attack
-0. Read the entire Solidity documentation (20%)
-1. Test a crowdfunding smart contract
-2. Check the book "Introducing Ethereum and Solidity: Foundations of Cryptocurrency and Blockchain programming for Beginners"
-3. Study other TOKEN standards aside from ERC20
-4. Study BAT smart contract
-5. Study Zepellin secure smart contracts
-6. Study the Dapp Solidity Tool
-7. Create my own Dapp
+- Study the contract that can deduce if an address belongs to an EOA or a contract account
+- Study more software testing!
+- Write about the double spending attack
+- Read the entire Solidity documentation (20%)
+- Test a crowdfunding smart contract
+- Check the book "Introducing Ethereum and Solidity: Foundations of Cryptocurrency and Blockchain programming for Beginners"
+- Study other TOKEN standards aside from ERC20
+- Study BAT smart contract
+- Study Zepellin secure smart contracts
+- Study the Dapp Solidity Tool
+- Create my own Dapp
+- Check the Multichain platform
 
 
 MILESTONES
@@ -310,3 +352,5 @@ MILESTONES
 1. Created my own Ethereum token. the Sinds Coin!
 2. Succesfully tested a smart contract using Truffle and Testrpc!
 3. Successfully deployed a smart contract using Metamask and Withpragma!
+4. Succesfully created a client-side application with Web3.js!
+
