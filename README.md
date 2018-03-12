@@ -1,6 +1,7 @@
 # Smart Contracts
 
 In **smart_contract_samples** there's a collection of useful Ethereum smart contracts written in Solidity.
+The list so far is:
 
 1. SimpleContract.sol - Basic smart contract for test purposes. 
 2. ERC20.sol - Standard token smart contract.
@@ -17,10 +18,12 @@ In **smart_contract_samples** there's a collection of useful Ethereum smart cont
 13. IsContract.sol - Library that has a function that can verify if an address is an EOA or a smart contract.
 14. StorageVSMemory.sol - Smart contract that shows some differences between the persistent memory and the non-persistent memory. In particular, the classic contrast of parameters by reference vs parameters by value is demonstrated.
 
-In **truffle_test** there's a test for compiling, deploying and testing smart contracts locally with Truffle and testRPC.
+In **tool_tests** there are tests for some important development tools for Solidity smart contracts.
+So far they are: 
 
-In **web3_test** there's a test for creating cliente-side applications that can interact with Ethereum based blockchains.
-Web3.js is the official Javascript library for Ethereum.
+1. **truffle_and_testrpc_test**. A test for compiling, deploying and testing smart contracts locally with Truffle and testRPC.
+2. **metamask_and_withpragma_test**. A test for writing smart contracts with Withpragma, an online IDE, and deploying them with Metamask, a web broswer extension that allows light interaction with the Ethereum blockchain.
+3. **web3_and_remix_test**. A test for creating client-side applications that can interact with Ethereum based blockchains. Web3.js is the official Javascript library for Ethereum. Remix is an online IDE for Solidity.
 
 And there's also **solidity_notes.txt**, my personal study notes so far about Solidity, smart contracts and the Ethereum platform.
 
