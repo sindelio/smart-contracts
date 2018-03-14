@@ -13,10 +13,12 @@ The list so far is:
 8. Crowdsale.sol - Crowdsale smart contract. Used to raise funds for a project.
 9. Ballot.sol - Voting smart contract. Used to create voting processes and to issue votes
 10. RemotePurchase.sol - Smart contract that allows one to sell an asset through the Ethereum platform.
-11. SimpleAuction.sol - Basic auction smart contract. Allows bidding and closes the auction in a specific time.
-12. BlindAuction.sol - Auction that supports blind bids and fake bids.
-13. IsContract.sol - Library that has a function that can verify if an address is an EOA or a smart contract.
-14. StorageVSMemory.sol - Smart contract that shows some differences between the persistent memory and the non-persistent memory. In particular, the classic contrast of parameters by reference vs parameters by value is demonstrated.
+11. RemotePurchaseCustomized.sol - Remote purchase smart contract customized and tested by me.
+12. SimpleAuction.sol - Basic auction smart contract. Allows bidding and closes the auction in a specific time.
+13. BlindAuction.sol - Auction that supports blind bids and fake bids.
+14. IsContract.sol - Library that has a function that can verify if an address is an EOA or a smart contract.
+15. StorageVSMemory.sol - Smart contract that shows some differences between the persistent memory and the non-persistent memory. In particular, the classic contrast of parameters by reference vs parameters by value is demonstrated.
+16. GeneralModifier.sol - Smart contract for a general purpose function modifier.
 
 In **tool_tests** there are tests for some important development tools for Solidity smart contracts.
 So far they are: 
