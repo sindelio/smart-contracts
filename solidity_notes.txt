@@ -5,6 +5,9 @@ Solidity is a high level programming language, contract oriented. In other words
 - Inheritance and multiple inheritance
 - Constructors
 - Polymorphism
+	- Overloading
+	- Overriding
+- Abstractions
 - Interfaces
 - Public, private, internal and external functions and variables (except external variables)
 - Maps
@@ -27,7 +30,14 @@ SYNTAX KEYWORDS AND NOTES
 - contract
 	Used to declare a contract(class) that can be instantiated(deployed) in the EVM.
 - library
-	xx
+	Restrictions for libraries in comparison to contracts:
+
+	1. No state variables
+	2. Cannot inherit nor be inherited
+	3. Cannot receive Ether
+
+	These might be lifted at a later point.
+	If a library’s code is executed using a CALL instead of a DELEGATECALL or CALLCODE, it will revert unless a view or pure function is called.
 - function
 	Used to declare a function. A function can be called with the order of the parameters changed by passing an object to it. It is important to distinguish 2 types of functions: Read-only (constant or view) functions, makes no change to state, costs no Gas. Transactional functions, makes changes to state, costs Gas. A function is public by default.
 	Functions with no names are used as a response to payments sent to the contract. There can only be one nameless function per contract and it should be one the payable type.
@@ -58,21 +68,28 @@ SYNTAX KEYWORDS AND NOTES
 
 	Adding a function with the same name would not work as above, because we would have a variable and a function with the same name, both created by the code, and the compiler would not know what to do with them.
 - private
-	Specifies that a state variable or function is viewable only by it's contract. The subcontracts, or childs, can't call a private function from their parents.
+	Specifies that a state variable or function is viewable only by it's contract. The subcontracts, or childs, can't access a private function or variable from their parents.
+	Everything that is inside a contract is visible to all external observers. Making something private only prevents other contracts from accessing and modifying the information, but it will still be visible to the whole world outside of the blockchain.
 - internal
-	Specifies that a state variable or function is viewable by it's smart contracts and it's childs.
+	Specifies that functions and state variables can only be accessed internally (i.e. from within the current contract or contracts deriving from it), without using this.
 - external
-	Specifies that a function can only be called by outside smart contracts. External functions are interesting to recevive large amounts of data, because they use less Gas than public functions for the same purpose.
+	External functions are part of the contract interface, which means they can be called from other contracts and via transactions. An external function f cannot be called internally (i.e. f() does not work, but this.f() works). External functions are interesting to receive large amounts of data, because they use less Gas than public functions for the same purpose.
 - view
-	Specifies that a function can only read from storage. A view functions costs no Gas. A normal function can read and write to storage, but it costs Gas.
+	Specifies that a function can only read from storage. A view functions costs no Gas. A normal function can read and write to storage, but it costs Gas. Getter methods are marked view.
 - constant
-	Alias for view, but deprecated.
+	In function terms is an alias for view, but deprecated and will be dropped on 0.5.0.   
+	In variable terms, n 	ot all types for constants are implemented at this time. The only supported types are value types and strings.
 - pure
 	Specifies that a function can't read or write to storage. A pure function costs no Gas. A normal function can read and write to storage, but it costs Gas.
 - returns
 	Specifies the expected returned variables from a function. A function can return multiple variables.
 - return
 	Classic return statement. One can also specify the returned variable inside the function, ommiting the return statement from the function "header"/"specification".
+	When a function has multiple output parameters, 
+
+	return (v0, v1, ..., vn)
+
+	can return multiple values. 
 - payable
 	A function modifier that allows functions to receive Ether.
 - this
@@ -84,7 +101,7 @@ SYNTAX KEYWORDS AND NOTES
 - require
 	Assert and require are special functions that help in dealing with exceptions. Throw is deprecated in the newer versions of Solidity. Require should be used instead of throw. Require checks on externally provided input data. 
 - pragma
-	Pragmas are instructions for the compiler about how to treat the source code.
+	Pragmas are instructions for the compiler about how to treat the source code. The symbol "^" denotes that if there's a big change in the compiler version, such as from 0.4.21to 0.5.0, then the code won't be compiled as it wouldn't work in the newer version of the compiler.
 - emit
 	Used to emit an event.
 - mapping
@@ -103,6 +120,58 @@ SYNTAX KEYWORDS AND NOTES
 - memory
 
 - delete
+
+- new
+	A contract can create a new contract using the new keyword. The full code of the contract being created has to be known in advance, so recursive creation-dependencies are not possible. This is part of the deterministic nature of the EVM.
+- indexed
+	In an event call, up to 3 parameters can receive the attribute indexed which will cause the respective arguments to be searchable for: It is possible to filter for specific values of indexed arguments in the user interface. All non-indexed arguments will be stored in the data part of the log. 
+	Indexed arguments will not be stored themselves. You can only search for the values, but it is impossible to retrieve the values themselves.
+- anonymous
+	Event qualifier. It is not possible to filter for specific anonymous events by name.
+- super
+	Refers to the upmost contract in the inheritance graph one level above. Can be used to call a polymorphed function from one of the super contracts, the highest one in the hierarchy exactly one level above.
+- abstract
+	Contracts are marked as abstract when at least one of their functions lacks an implementation. They can't be compiled but can be used as base for another contracts.
+- interface
+	Interfaces are similar to abstract contracts, but they cannot have any functions implemented. There are further restrictions:
+
+	1. Cannot inherit other contracts or interfaces.
+	2. Cannot define constructor.
+	3. Cannot define variables.
+	4. Cannot define structs.
+	5. Cannot define enums.
+
+	Some of these restrictions might be lifted in the future. Example:
+
+	pragma solidity ^0.4.11;
+	interface Token {
+	    function transfer(address recipient, uint amount) public;
+	}
+- using a for B
+	The directive using A for B; can be used to attach library functions (from the library A) to any type (B). These functions will receive the object they are called on as their first parameter (like the self variable in Python).
+	The effect of using A for *; is that the functions from the library A are attached to any type.
+	The using A for B; directive is active for the current scope, which is limited to a contract for now but will be lifted to the global scope later, so that by including a module, its data types including library functions are available without having to add further code.
+
+Note: Solidity has no switch statement, but the inline assembly has!
+
+VISIBILITY SPECIFIERS
+
+The visibility specifier is given after the type for state variables and between parameter list and return parameter list for functions.
+
+	pragma solidity ^0.4.16;
+
+	contract C {
+	    function f(uint a) private pure returns (uint b) { return a + 1; }
+	    function setData(uint a) internal { data = a; }
+	    uint public data;
+	}
+
+Existing visibility specifiers:
+
+- public
+- private
+- internal
+- external
 
 DATA TYPES
 
@@ -127,116 +196,286 @@ ESCAPE SEQUENCES FOR STRING LITERALS
 - \xNN
 - \uNNNN
 
-GLOBALLY AVAILABLE VARIABLES:
+ARRAYS
+
+Arrays have the built in pull, push and length functions.
+
+EXPRESSIONS AND CONTROL STRUCTURES
+
+Most of the control structures from JavaScript are available in Solidity except for switch and goto. So there is:
+
+- if
+- else
+- while
+- do
+- for
+- break
+- continue
+- return, 
+- ? :
+
+With the usual semantics known from C or JavaScript.
+Parentheses can not be omitted for conditionals, but curly brances can be omitted around single-statement bodies.
+Note that there is no type conversion from non-boolean to boolean types as there is in C and JavaScript, so 
+
+	if (1) { ... } 
+
+is not valid Solidity.
+
+FUNCTION CALLS
+
+Internal Function Calls:
+
+Functions of the current contract can be called directly (“internally”), also recursively, as seen in this nonsensical example:
+
+	pragma solidity ^0.4.16;
+
+	contract C {
+	    function g(uint a) public pure returns (uint ret) { return f(); }
+	    function f() internal pure returns (uint ret) { return g(7) + f(); }
+	}
+
+External Function Calls:
+
+The expressions this.g(8); and c.g(2); (where c is a contract instance) are also valid function calls, but this time, the function will be called “externally”, via a message call and not directly via jumps. Please note that function calls on this cannot be used in the constructor, as the actual contract has not been created yet.
+Functions of other contracts have to be called externally. For an external call all function arguments have to be copied to memory. External calls are also known as message calls, since they perform actual EVM calls.
+When calling functions of other contracts, the amount of Wei sent with the call and the gas can be specified with special options .value() and .gas(), respectively:
+
+	pragma solidity ^0.4.0;
+
+	contract InfoFeed {
+	    function info() public payable returns (uint ret) { return 42; }
+	}
+
+	contract Consumer {
+	    InfoFeed feed;
+	    function setFeed(address addr) public { feed = InfoFeed(addr); }
+	    function callFeed() public { feed.info.value(10).gas(800)(); }
+	}
+
+View Functions:
+
+Functions can be declared view in which case they promise not to modify the state.
+
+The following statements are considered modifying the state:
+
+1. Writing to state variables.
+2. Emitting events.
+3. Creating other contracts.
+4. Using selfdestruct.
+5. Sending Ether via calls.
+6. Calling any function not marked view or pure.
+7. Using low-level calls.
+8. Using inline assembly that contains certain opcodes.
+
+Pure Functions:
+
+Functions can be declared pure in which case they promise not to read from or modify the state.
+In addition to the list of state modifying statements explained above, the following are considered reading from the state:
+
+1. Reading from state variables.
+2. Accessing this.balance or <address>.balance.
+3. Accessing any of the members of block, tx, msg (with the exception of msg.sig and msg.data).
+4. Calling any function not marked pure.
+5. Using inline assembly that contains certain opcodes.
+
+Fallback Function:
+
+A contract can have exactly one unnamed function. This function cannot have arguments and cannot return anything. It is executed on a call to the contract if none of the other functions match the given function identifier (or if no data was supplied at all).
+Furthermore, this function is executed whenever the contract receives plain Ether (without data). Additionally, in order to receive Ether, the fallback function must be marked payable. If no such function exists, the contract cannot receive Ether through regular transactions. But it can receive through payable functions.
+
+GLOBALLY AVAILABLE VARIABLES
 
 - msg
-	A magic global variable that contains some properties which allow access to the blockchain. msg.sender is always the address where the current (external) function call came from. 
+	A magic global variable that contains some properties which allow access to the blockchain. msg.sender is always the address where the current (external) function call came from.
+- block 
 
-BUILT IN FUNCTIONS:
+BUILT IN FUNCTIONS
 
-- msg.sender.send()
-	Used to transfer Ethereum from one account to another.
-- now
-	????
+Block and Transaction Properties:
 
-UNITS:
+- block.blockhash(uint blockNumber) returns (bytes32): hash of the given block - only works for 256 most recent 	blocks excluding current
+- block.coinbase (address): current block miner’s address
+- block.difficulty (uint): current block difficulty
+- block.gaslimit (uint): current block gaslimit
+- block.number (uint): current block number
+- block.timestamp (uint): current block timestamp as seconds since unix epoch
+- gasleft() returns (uint256): remaining gas
+- msg.data (bytes): complete calldata
+- msg.gas (uint): remaining gas - deprecated in version 0.4.21 and to be replaced by gasleft()
+- msg.sender (address): sender of the message (current call)
+- msg.sig (bytes4): first four bytes of the calldata (i.e. function identifier)
+- msg.value (uint): number of wei sent with the message
+- now (uint): current block timestamp (alias for block.timestamp)
+- tx.gasprice (uint): gas price of the transaction
+- tx.origin (address): sender of the transaction (full call chain)
 
-- now
-	Used to get the time and date of the present moment.
-- ether
-	Ether cryptocurrency.
-- 
+Error Handling:
 
+- assert(bool condition):
+	throws if the condition is not met - to be used for internal errors.
+- require(bool condition):
+	throws if the condition is not met - to be used for errors in inputs or external components.
+- revert():
+	abort execution and revert state changes
 
+An assert-style exception is generated in the following situations:
 
-ETHEREUM VIRTUAL MACHINE (EVM)
+1. If you access an array at a too large or negative index (i.e. x[i] where i >= x.length or i < 0).
+2. If you access a fixed-length bytesN at a too large or negative index.
+3. If you divide or modulo by zero (e.g. 5 / 0 or 23 % 0).
+4. If you shift by a negative amount.
+5. If you convert a value too big or negative into an enum type.
+6. If you call a zero-initialized variable of internal function type.
+7. If you call assert with an argument that evaluates to false.
 
-The Ethereum Virtual Machine or EVM is the runtime environment for smart contracts in Ethereum. It is not only sandboxed but actually completely isolated, which means that code running inside the EVM has no access to network, filesystem or other processes. Smart contracts even have limited access to other smart contracts.
+A require-style exception is generated in the following situations:
 
-Accounts:
+1. Calling throw.
+2. Calling require with an argument that evaluates to false.
+3. If you call a function via a message call but it does not finish properly (i.e. it runs out of gas, has no matching function, or throws an exception itself), except when a low level operation call, send, delegatecall or callcode is used. The low level operations never throw exceptions but indicate failures by returning false.
+4. If you create a contract using the new keyword but the contract creation does not finish properly (see above for the definition of “not finish properly”).
+5. If you perform an external function call targeting a contract that contains no code.
+6. If your contract receives Ether via a public function without payable modifier (including the constructor and the fallback function).
+7. If your contract receives Ether via a public getter function.
+8. If a .transfer() fails.
 
-There are two kinds of accounts in Ethereum which share the same address space: External accounts that are controlled by public-private key pairs (i.e. humans) and contract accounts which are controlled by the code stored together with the account.
-Regardless of whether or not the account stores code, the two types are treated equally by the EVM.
-Every account has a persistent key-value store mapping 256-bit words to 256-bit words called storage.
-Furthermore, every account has a balance in Ether (in “Wei” to be exact) which can be modified by sending transactions that include Ether.
+Internally, Solidity performs a revert operation (instruction 0xfd) for a require-style exception and executes an invalid operation (instruction 0xfe) to throw an assert-style exception. In both cases, this causes the EVM to revert all changes made to the state. The reason for reverting is that there is no safe way to continue execution, because an expected effect did not occur. Because we want to retain the atomicity of transactions, the safest thing to do is to revert all changes and make the whole transaction (or at least call) without effect. Note that assert-style exceptions consume all gas available to the call, while require-style exceptions will not consume any gas starting from the Metropolis release.
 
-/*
-The EVM is composed of:
+Address Related:
 
-- A stack of 32 byte addresses up to 1024 addresses total. Recursions aren't recommended as they can easily blow up the stack.
-- A memory. An infinetely expanding byte array but gets pricier in Gas as it builds up. It holds the present state of the Ethereum Blockchain.
-- A storage. A permanent contract storage, read and write.
-- Environment Variables.
-- Logs.
-- Sub-Calling. Operation by which a contract can call another contract.
+- <address>.balance (uint256):
+	balance of the Address in Wei
+- <address>.transfer(uint256 amount):
+	send given amount of Wei to Address, throws on failure, forwards 2300 gas stipend, not adjustable
+- <address>.send(uint256 amount) returns (bool):
+	send given amount of Wei to Address, returns false on failure, forwards 2300 gas stipend, not adjustable
+- <address>.call(...) returns (bool):
+	issue low-level CALL, returns false on failure, forwards all available gas, adjustable
+- <address>.callcode(...) returns (bool):
+	issue low-level CALLCODE, returns false on failure, forwards all available gas, adjustable
+- <address>.delegatecall(...) returns (bool):
+	issue low-level DELEGATECALL, returns false on failure, forwards all available gas, adjustable
 
-Gas: a mechanism to avoid the halting problem. It consists in payment for computational steps in the EVM.
+Contract Related:
 
-RLP: Recursive Length Prefix Encoding. Basically puts the lenght before and a code after, in this syntax: lenght x code. used extensively in the EVM.
-*/
+- this (current contract’s type):
+	the current contract, explicitly convertible to Address
+- selfdestruct(address recipient):
+	destroy the current contract, sending its funds to the given Address
+- suicide(address recipient):
+	deprecated alias to selfdestruct
 
-ETHEREUM BLOCKCHAIN
+Mathematical and Cryptographic Functions:
 
-A blockchain is a globally shared, transactional database. This means that everyone can read entries in the database just by participating in the network. If you want to change something in the database, you have to create a so-called transaction which has to be accepted by all others. 
+- addmod(uint x, uint y, uint k) returns (uint):
+	compute (x + y) % k where the addition is performed with arbitrary precision and does not wrap around at 2**256. Assert that k != 0 starting from version 0.5.0.
+- mulmod(uint x, uint y, uint k) returns (uint):
+	compute (x * y) % k where the multiplication is performed with arbitrary precision and does not wrap around at 2**256. Assert that k != 0 starting from version 0.5.0.
+- keccak256(...) returns (bytes32):
+	compute the Ethereum-SHA-3 (Keccak-256) hash of the (tightly packed) arguments
+- sha256(...) returns (bytes32):
+	compute the SHA-256 hash of the (tightly packed) arguments
+- sha3(...) returns (bytes32):
+	alias to keccak256
+- ripemd160(...) returns (bytes20):
+	compute RIPEMD-160 hash of the (tightly packed) arguments
+- ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address):
+recover the address associated with the public key from elliptic curve signature or return zero on error
 
-Transactions:
+Logging:
 
-The word transaction implies that the change you want to make (assume you want to change two values at the same time) is either not done at all or completely applied. Furthermore, while your transaction is applied to the database, no other transaction can alter it.
-As an example, imagine a table that lists the balances of all accounts in an electronic currency. If a transfer from one account to another is requested, the transactional nature of the database ensures that if the amount is subtracted from one account, it is always added to the other account. If due to whatever reason, adding the amount to the target account is not possible, the source account is also not modified.
-Furthermore, a transaction is always cryptographically signed by the sender (creator). This makes it straightforward to guard access to specific modifications of the database. In the example of the electronic currency, a simple check ensures that only the person holding the keys to the account can transfer money from it.
+It is also possible to access the low-level interface to the logging mechanism via the functions log0, log1, log2, log3 and log4. logi takes i + 1 parameter of type bytes32, where the first argument will be used for the data part of the log and the others as topics. Example:
 
-Blocks:
+	contract C {
+	    function f() public payable {
+	        bytes32 _id = 0x420042;
+	        log3(
+	            bytes32(msg.value),
+	            bytes32(0x50cb9fe53daa9737b786ab3646f04d0150dc50ef4e75f59509d83667ad5adb20),
+	            bytes32(msg.sender),
+	            _id
+	        );
+	    }
+	}
 
-Groups of transactions.
-The blocks form a linear sequence in time and that is where the word “blockchain” derives from. Blocks are added to the chain in rather regular intervals - for Ethereum this is roughly every 17 seconds.
+Abstract Functions VS Function Types:
 
-Every block header contains 3 tries:
- 	
-- Transactions
-- State
-- Receipts
+Note that a function without implementation is different from a Function Type even though their syntax looks very similar.
+Example of function without implementation (a function declaration):
 
-State. Consists of key-values mapping addresses to account objects. Every account contains 4 pieces of data:
+	function foo(address) external returns (address);
+
+Example of a Function Type (a variable declaration, where the variable is of type function):
+
+	function(address) external returns (address) foo;
+
+GLOBALLY AVAILABLE UNITS
 	
-- Nonce. Proof of work that allows one to insert append transactions to the Blockchain.
-- Balance. In Ether (ETH). 
-- Code hash. SHA most likely.
-- Storage trie root.
+Ether units:
 
-Transactions. Contains 7 values:
-	
-- Nonce (anti replay attack)
-- Gasprice (amount of ether per unit gas)
-- Startgas (maximum gas consumable)
-- To (destination address)
-- Value (amount of ETH to send)
-- Data (readable by contract code)
-- v, r, s (ECDSA cryptography signature values)
+The Ethereum white paper mentions only wei, szabo, finney and ether.
+Although in web3.js the following list seems to exist:
 
-Receipts. Every transaction has a corresponding receipt. Has a few pieces of data:
+'wei':          '1',
+'kwei':         '1000',
+'ada':          '1000',
+'femtoether':   '1000',
+'mwei':         '1000000',
+'babbage':      '1000000',
+'picoether':    '1000000',
+'gwei':         '1000000000',
+'shannon':      '1000000000',
+'nanoether':    '1000000000',
+'nano':         '1000000000',
+'szabo':        '1000000000000',
+'microether':   '1000000000000',
+'micro':        '1000000000000',
+'finney':       '1000000000000000',
+'milliether':   '1000000000000000',
+'milli':        '1000000000000000',
+'ether':        '1000000000000000000',
+'kether':       '1000000000000000000000',
+'grand':        '1000000000000000000000',
+'einstein':     '1000000000000000000000',
+'mether':       '1000000000000000000000000',
+'gether':       '1000000000000000000000000000',
+'tether':       '1000000000000000000000000000000'
 
-- Intermediate state root (hash that represents the state after the transaction is executed)
-- Cumulative gas used (total amount of gas used in that block including that transaction)
-- Logs (append-only, not readable by contracts)
+Time units:
 
-Mining: Process by which blocks of transactions are appended in Ethereum Blockchain. It consists in the resolution of a math problem by the nodes, and whichever node solves the problem first gets the right to append a block, a.k.a. set of transactions,  to the Blockchain. Mining in Ethereum is GPU friendly, with a memory hardness approach. This means that memory is the most important factor, not computational power.
+- seconds
+- minutes
+- hours
+- days
+- weeks
+- years
 
-Merkle tree: Tree data structure that allows for efficient verifiable proof that a transaction was included in a block. Also called hash trees, because it sores the hashes of the data in the nodes of the tree.
+These suffixes cannot be applied to variables. If you want to interpret some input variable in e.g. days, you can do it in the following way:
 
-Trie: Tree data structure that allows for efficient lookups or searches. Also called digital tree or prefix tree or radix tree.
+    function f(uint start, uint daysAfter) public {
+	    if (now >= start + daysAfter * 1 days) {
+	      // ...
+	    }
+	}
 
-Merkle-patricia-tree: A special type of trie used in the Ethereum Blockchain. Also called patricia tree, this type of trie has some improvements over the normal trie. In the Ethereum Blockchain, all entries in the patricia tree are encoded using the RLP (Recursive Length Prefix).
-
-EVM GOOD PRACTICES AND TRICKS
+GOOD PRACTICES AND TRICKS FOR THE EVM
 
 - Use bytes instead of byte[]. It is cheaper because each element in byte[] has 32 bytes, whereas bytes is dynamically allocated.
 - callcode is deprecated. Use delegatecall or even better: let the caller withdraw his funds.
-- this.balance can be used to query the current contract balance.
+- address(this).balance can be used to query the current contract balance.
 - There's no octal literals in Solidity. Only decimal and hexadecimal literals. e.g. 0.1, .1, 1.. Scientific notation is supported with a fractional base and an integer exponent. e.g. 2.5e1
 - Explicity conversion (casting) is possible for some types.
--
+- transfer is more secure than send.
+- Smart contracts are also types, and can be used for type conversions!
+- A variable declared anywhere within a function will be in scope for the entire function, regardless of where it is declared (this will change soon)
+- The compiler does not enforce yet that a view method is not modifying state. It raises a warning though. It will enforce in 0.5.0.
+- A simple rule to remember for inheritance is to specify the base classes in the order from “most base-like” to “most derived”.
+- A contract can use the ADDRESS opcode to find out “where” it is currently running.
 
+INLINE ASSEMBLY
 
+---
 
 SECURITY MEASURES AND GOOD PRACTICES
 
@@ -256,6 +495,7 @@ Common pitfalls:
 
 1. Private information leaked.
 2. Re-entrancy attacks.
+	Any interaction with another contract imposes a potential danger, especially if the source code of the contract is not known in advance. The current contract hands over control to the called contract and that may potentially do just about anything. Even if the called contract inherits from a known parent contract, the inheriting contract is only required to have a correct interface. The implementation of the contract, however, can be completely arbitrary and thus, pose a danger. In addition, be prepared in case it calls into other contracts of your system or even back into the calling contract before the first call returns. This means that the called contract can change state variables of the calling contract via its functions. Write your functions in a way that, for example, calls to external functions happen after any changes to state variables in your contract so your contract is not vulnerable to a reentrancy exploit.
 3. Loops can trigger Gas limit.
 4. Ether send function can fail.
 5. Timestamp can be manipulated by miners.
@@ -328,7 +568,6 @@ ETHEREUM WALLETS
 QUESTIONS
 
 ? This statement
-? Indexed attributes on events??? Up to 3 parameters can have the indexed attribute in an event.
 ? Understand better the trie, radix tree and merkle tree.
 
 TODO LIST
@@ -345,7 +584,6 @@ TODO LIST
 - Study the Dapp Solidity Tool
 - Create my own Dapp
 - Check the Multichain platform
-
 
 MILESTONES
 

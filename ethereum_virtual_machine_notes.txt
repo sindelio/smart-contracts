@@ -1,0 +1,23 @@
+ETHEREUM VIRTUAL MACHINE (EVM)
+
+The Ethereum Virtual Machine or EVM is the runtime environment for smart contracts in Ethereum. It is not only sandboxed but actually completely isolated, which means that code running inside the EVM has no access to network, filesystem or other processes. Smart contracts even have limited access to other smart contracts.
+
+Accounts:
+
+There are two kinds of accounts in Ethereum which share the same address space: External accounts that are controlled by public-private key pairs (i.e. humans) and contract accounts which are controlled by the code stored together with the account.
+Regardless of whether or not the account stores code, the two types are treated equally by the EVM.
+Every account has a persistent key-value store mapping 256-bit words to 256-bit words called storage.
+Furthermore, every account has a balance in Ether (in “Wei” to be exact) which can be modified by sending transactions that include Ether.
+
+The EVM is composed of:
+
+- A stack of 32 byte addresses up to 1024 addresses total. Recursions aren't recommended as they can easily blow up the stack.
+- A memory. An infinetely expanding byte array but gets pricier in Gas as it builds up. It holds the present state of the Ethereum Blockchain.
+- A storage. A permanent contract storage, read and write.
+- Environment Variables.
+- Logs.
+- Sub-Calling. Operation by which a contract can call another contract.
+
+Gas: a mechanism to avoid the halting problem. It consists in payment for computational steps in the EVM.
+
+RLP: Recursive Length Prefix Encoding. Basically puts the lenght before and a code after, in this syntax: lenght x code. used extensively in the EVM.
