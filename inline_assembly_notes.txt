@@ -108,3 +108,169 @@ number	 					F	current block number
 difficulty	 				F	difficulty of the current block
 gaslimit	 				F	block gas limit of the current block
 
+FUNCTIONAL STYLE VS INTRUCTION STYLE
+
+Instruction style example:
+
+	3 0x80 mload add 0x80 mstore
+
+Functional style example:
+
+	mstore(0x80, add(mload(0x80), 3))
+
+Functional style expressions cannot use instructional style internally, i.e. 1 2 mstore(0x80, add) is not valid assembly, it has to be written as mstore(0x80, add(2, 1)). For opcodes that do not take arguments, the parentheses can be omitted.
+Note that the order of arguments is reversed in functional-style as opposed to the instruction-style way. If you use functional-style, the first argument will end up on the stack top.
+
+ACCESS TO EXTERNAL VARIABLES AND FUNCTIONS
+
+Solidity variables and other identifiers can be accessed by simply using their name. For memory variables, this will push the address and not the value onto the stack. Storage variables are different: Values in storage might not occupy a full storage slot, so their “address” is composed of a slot and a byte-offset inside that slot. To retrieve the slot pointed to by the variable x, you used x_slot and to retrieve the byte-offset you used x_offset. Example:
+
+pragma solidity ^0.4.11;
+
+	contract C {
+	    uint b;
+	    function f(uint x) public returns (uint r) {
+	        assembly {
+	            r := mul(x, sload(b_slot)) // ignore the offset, we know it is zero
+	        }
+	    }
+	}
+
+Functions external to inline assembly can also be accessed: The assembly will push their entry label (with virtual function resolution applied).
+
+DECLARING ASSEMBLY-LOCAL VARIABLES
+
+You can use the let keyword to declare variables that are only visible in inline assembly and actually only in the current {...}-block. What happens is that the let instruction will create a new stack slot that is reserved for the variable and automatically removed again when the end of the block is reached. You need to provide an initial value for the variable which can be just 0, but it can also be a complex functional-style expression.
+
+	pragma solidity ^0.4.16;
+
+	contract C {
+	    function f(uint x) public view returns (uint b) {
+	        assembly {
+	            let v := add(x, 1)
+	            mstore(0x80, v)
+	            {
+	                let y := add(sload(v), 1)
+	                b := y
+	            } // y is "deallocated" here
+	            b := add(b, v)
+	        } // v is "deallocated" here
+	    }
+	}
+
+ASSIGNMENTS
+
+Assignments are possible to assembly-local variables and to function-local variables. Take care that when you assign to variables that point to memory or storage, you will only change the pointer and not the data.
+
+There are two kinds of assignments: functional-style and instruction-style. For functional-style assignments (variable := value), you need to provide a value in a functional-style expression that results in exactly one stack value and for instruction-style (=: variable), the value is just taken from the stack top. For both ways, the colon points to the name of the variable. The assignment is performed by replacing the variable’s value on the stack by the new value.
+
+	{
+	    let v := 0 // functional-style assignment as part of variable declaration
+	    let g := add(v, 2)
+	    sload(10)
+	    =: v // instruction style assignment, puts the result of sload(10) into v
+	}
+
+CONTROL STRUCTURES
+
+If:
+
+The if statement can be used for conditionally executing code. There is no “else” part, consider using “switch”  if you need multiple alternatives.
+
+	{
+	    if eq(value, 0) { revert(0, 0) }
+	}
+
+Switch:
+
+You can use a switch statement as a very basic version of “if/else”. It takes the value of an expression and compares it to several constants. The branch corresponding to the matching constant is taken. Contrary to the error-prone behaviour of some programming languages, control flow does not continue from one case to the next. There can be a fallback or default case called default.
+
+	{
+	    let x := 0
+	    switch calldataload(4)
+	    case 0 {
+	        x := calldataload(0x24)
+	    }
+	    default {
+	        x := calldataload(0x44)
+	    }
+	    sstore(0, div(x, 2))
+	}
+
+The list of cases does not require curly braces, but the body of a case does require them.
+
+Loops:
+
+Assembly supports a simple for-style loop. For-style loops have a header containing an initializing part, a condition and a post-iteration part. The condition has to be a functional-style expression, while the other two are blocks. If the initializing part declares any variables, the scope of these variables is extended into the body (including the condition and the post-iteration part).
+
+The following example computes the sum of an area in memory.
+
+	{
+	    let x := 0
+	    for { let i := 0 } lt(i, 0x100) { i := add(i, 0x20) } {
+	        x := add(x, mload(i))
+	    }
+	}
+
+For loops can also be written so that they behave like while loops: Simply leave the initialization and post-iteration parts empty.
+
+	{
+	    let x := 0
+	    let i := 0
+	    for { } lt(i, 0x100) { } {     // while(i < 0x100)
+	        x := add(x, mload(i))
+	        i := add(i, 0x20)
+	    }
+	}
+
+Functions:
+
+Assembly allows the definition of low-level functions. These take their arguments (and a return PC) from the stack and also put the results onto the stack. Calling a function looks the same way as executing a functional-style opcode.
+
+Functions can be defined anywhere and are visible in the block they are declared in. Inside a function, you cannot access local variables defined outside of that function. There is no explicit return statement.
+
+If you call a function that returns multiple values, you have to assign them to a tuple using a, b := f(x) or let a, b := f(x).
+
+The following example implements the power function by square-and-multiply.
+
+	{
+	    function power(base, exponent) -> result {
+	        switch exponent
+	        case 0 { result := 1 }
+	        case 1 { result := base }
+	        default {
+	            result := power(mul(base, base), div(exponent, 2))
+	            switch mod(exponent, 2)
+	                case 1 { result := mul(base, result) }
+	        }
+	    }
+	}
+
+THINGS TO AVOID
+
+Inline assembly might have a quite high-level look, but it actually is extremely low-level. Function calls, loops, ifs and switches are converted by simple rewriting rules and after that, the only thing the assembler does for you is re-arranging functional-style opcodes, managing jump labels, counting stack height for variable access and removing stack slots for assembly-local variables when the end of their block is reached. Especially for those two last cases, it is important to know that the assembler only counts stack height from top to bottom, not necessarily following control flow. Furthermore, operations like swap will only swap the contents of the stack but not the location of variables.
+So basically avoid working with the stack.
+
+SOLIDITY VS EVM ASSEMBLY
+
+In contrast to EVM assembly, Solidity knows types which are narrower than 256 bits, e.g. uint24. In order to make them more efficient, most arithmetic operations just treat them as 256-bit numbers and the higher-order bits are only cleaned at the point where it is necessary, i.e. just shortly before they are written to memory or before comparisons are performed. This means that if you access such a variable from within inline assembly, you might have to manually clean the higher order bits first.
+Solidity manages memory in a very simple way: There is a “free memory pointer” at position 0x40 in memory. If you want to allocate memory, just use the memory from that point on and update the pointer accordingly.
+Elements in memory arrays in Solidity always occupy multiples of 32 bytes (yes, this is even true for byte[], but not for bytes and string). Multi-dimensional memory arrays are pointers to memory arrays. The length of a dynamic array is stored at the first slot of the array and then only the array elements follow.
+
+Warning: Statically-sized memory arrays do not have a length field, but it will be added soon to allow better convertibility between statically- and dynamically-sized arrays, so please do not rely on that.
+
+STANDALONE ASSEMBLY
+
+The assembly language described as inline assembly above can also be used standalone and in fact, the plan is to use it as an intermediate language for the Solidity compiler. In this form, it tries to achieve several goals:
+
+1. Programs written in it should be readable, even if the code is generated by a compiler from Solidity.
+2. The translation from assembly to bytecode should contain as few “surprises” as possible.
+3. Control flow should be easy to detect to help in formal verification and optimization.
+
+Assembly happens in four stages:
+
+Parsing
+Desugaring (removes switch, for and functions)
+Opcode stream generation
+Bytecode generation
+
